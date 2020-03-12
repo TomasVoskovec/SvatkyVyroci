@@ -1,4 +1,5 @@
-﻿using SvatkyVyroci.Model;
+﻿using SvatkyVyroci.Data;
+using SvatkyVyroci.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,8 +14,8 @@ namespace SvatkyVyroci
 {
     public partial class Form1 : Form
     {
-        JsonController jsonController = new JsonController();
-        List<Event> loadedEvents = new List<Event>();
+        EventDatabase eventDatabase = new EventDatabase();
+        List<Event> loadedEvents;
 
         public Form1()
         {
@@ -24,7 +25,12 @@ namespace SvatkyVyroci
 
         void init()
         {
-            loadedEvents = jsonController.LoadEvents();
+            loadedEvents = eventDatabase.GetAllEvents();
+            if (loadedEvents == null)
+            {
+                loadedEvents = new List<Event>();
+            }
+
             dateOnCalendarChanged();
 
             switchPanels(true);
@@ -97,15 +103,9 @@ namespace SvatkyVyroci
                         newEvent.Info = eventInfo.Text;
                     }
 
-                    List<Event> events = jsonController.LoadEvents();
-                    if(events == null)
-                    {
-                        events = new List<Event>();
-                    }
-                    events.Add(newEvent);
-                    jsonController.SaveEvents(events);
+                    eventDatabase.SaveEvent(newEvent);
 
-                    loadedEvents = events;
+                    loadedEvents.Add(newEvent);
 
                     eventName.Text = "Název události";
                     eventName.ForeColor = Color.FromArgb(191, 205, 219);
