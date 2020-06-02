@@ -16,6 +16,7 @@ namespace SvatkyVyroci
     {
         EventDatabase eventDatabase = new EventDatabase();
         List<Event> loadedEvents;
+        Dictionary<int, Event> currentEventIds = new Dictionary<int, Event>();
 
         public Form1()
         {
@@ -26,6 +27,9 @@ namespace SvatkyVyroci
         // Funkce načtená při startu stránky
         void init()
         {
+            // 
+            listEvents.DoubleClick += eventItem_DoubleClick;
+
             // Načtení všech událostí z databáze
             loadedEvents = eventDatabase.GetAllEvents();
             if (loadedEvents == null)
@@ -143,10 +147,26 @@ namespace SvatkyVyroci
             }
         }
 
+        // Zeptat se uživatele na vymazání události
+        void eventItem_DoubleClick(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Opravdu si přejete odstranit tuto událost?", "Odstranit?", MessageBoxButtons.YesNo);
+
+            if (dialogResult == DialogResult.Yes)
+            {
+                Event selectedEvent = currentEventIds[listEvents.SelectedIndex];
+                eventDatabase.DeleteItem(selectedEvent);
+                loadedEvents.Remove(selectedEvent);
+
+                dateOnCalendarChanged();
+            }
+        }
+
         // Funkce vyvolaná při změnění data v kalendáři
         void dateOnCalendarChanged()
         {
             // Vymazání předchozího seznamu událostí
+            currentEventIds = new Dictionary<int, Event>();
             listEvents.Items.Clear();
 
             // Výpis všech dálostí
@@ -166,13 +186,14 @@ namespace SvatkyVyroci
                         // Vytvoření odstupu (dle typu události)
                         if (loadedEvent.EventType == EventTypes.Anniversary)
                         {
-                            eventTypeText = loadedEvent.EventType.ToString() + "\t";
+                            eventTypeText = "Výročí\t";
                         }
                         else if (loadedEvent.EventType == EventTypes.Holiday)
                         {
-                            eventTypeText = loadedEvent.EventType.ToString() + "\t\t";
+                            eventTypeText = "Svátek\t";
                         }
                         // Přidání události do seznamu
+                        currentEventIds.Add(listEvents.Items.Count, loadedEvent);
                         listEvents.Items.Add(eventTypeText + loadedEvent.Name + info);
                     }
                 }

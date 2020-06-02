@@ -54,5 +54,14 @@ namespace SvatkyVyroci.Data
                 }
             }
         }
+
+        // Odstranění události z databáze
+        public void DeleteItem(Event deletedItem)
+        {
+            lock (locker)
+            {
+                database.Delete(deletedItem);
+            }
+        }
     }
 }
